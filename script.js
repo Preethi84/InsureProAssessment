@@ -9,6 +9,8 @@ fs.readFile(filePath, 'utf8', (err,data) => {
         return;
     }
     const lines = data.split('\n');
+
+    let finalResult = {};
     let totalSales = 0;
     let monthSales = {};
     const popularItemMonthWise = {};
@@ -22,6 +24,7 @@ fs.readFile(filePath, 'utf8', (err,data) => {
         const totalPrice = parseFloat(columns[4]);
         
         totalSales += totalPrice;
+
         const date = columns[0];
         const month = date.slice(0, 7);
 
@@ -32,6 +35,7 @@ fs.readFile(filePath, 'utf8', (err,data) => {
             monthSales[month] = 0;
         }
         monthSales[month] += totalPrice;
+        
 
         if(!popularItemMonthWise[month]){
             popularItemMonthWise[month] = {};
@@ -54,15 +58,7 @@ fs.readFile(filePath, 'utf8', (err,data) => {
 
     }
 
-    console.log(`Total Sales : ${totalSales}\n`);
-
-    console.log('Month-wise Sales Totals:');
-    for(const month in monthSales){
-        console.log(`${month}: ${monthSales[month]}`)
-    }
-    console.log('\n');
-    console.log('Most Popular Items by Month:');
-
+    let popularItemMonthWiseSub = {};
     for(const month in popularItemMonthWise){
         let mostPopularItem = '';
         let maxQuantity = 0;
@@ -73,11 +69,13 @@ fs.readFile(filePath, 'utf8', (err,data) => {
                 maxQuantity = popularItemMonthWise[month][item];
             }
         }
-        console.log(`${month}: ${mostPopularItem} (Quantity Sold: ${maxQuantity})`);
+        popularItemMonthWiseSub[month] = {
+            'Item':mostPopularItem,
+            'Quantity': maxQuantity
+        }
     }
 
-    console.log('\n');
-    console.log('Items Generating Most Revenue by Month:');
+    const mostRevenueItems = {};
 
     for (const month in monthItemRevenues) {
         let topRevenueItem = '';
@@ -88,6 +86,16 @@ fs.readFile(filePath, 'utf8', (err,data) => {
                 maxRevenue = monthItemRevenues[month][item];
             }
         }
-        console.log(`${month}: ${topRevenueItem} (Revenue: ${maxRevenue})`);
+        mostRevenueItems[month] = {
+            'Item': topRevenueItem,
+            'Revenue': maxRevenue
+        }
     }
+    
+    finalResult['totalSales'] = totalSales;
+    finalResult['monthWiseSales'] = monthSales;
+    finalResult['popularMonthWise'] = popularItemMonthWiseSub;
+    finalResult['maxRevenueItem'] = mostRevenueItems;
+    
+    console.log(finalResult);
 });
